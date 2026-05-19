@@ -17,6 +17,7 @@ public class Enemigo : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        objetivo = GameObject.Find("Objetivo");
         agent = GetComponent<NavMeshAgent>();
         anim = GetComponent<Animator>();
 
