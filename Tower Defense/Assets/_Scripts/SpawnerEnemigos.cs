@@ -10,17 +10,48 @@ public class SpawnerEnemigos : MonoBehaviour
 
     private int enemigosDuranteEstaOleada;
 
-    public delegate void OleadaTerminada();
-    public event OleadaTerminada EnOleadaTerminada;
+    public bool laOleadaHaIniciado;
+    public List<GameObject> EnemigosGenerados;
+
+    public delegate void EstadoOleada();
+    public event EstadoOleada EnOleadaIniciada;
+    public event EstadoOleada EnOleadaTerminada;
+    public event EstadoOleada EnOleadaGanada;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         oleada = 0;
-        ConfigurarCantidadDeEnemigos();
-        InstanciarEnemigo();
     }
-    
+
+    public void FixedUpdate()
+    {
+        if (laOleadaHaIniciado && EnemigosGenerados.Count == 0) 
+        {
+            GanarOla();
+        }
+    }
+
+    private void GanarOla()
+    {
+        if (laOleadaHaIniciado && EnOleadaGanada != null) 
+        {
+            EnOleadaGanada();
+            laOleadaHaIniciado = false;
+        }
+    }
+
+    public void EmpezarOleada() 
+    {
+        laOleadaHaIniciado = true;
+        if (EnOleadaIniciada != null) 
+        {
+            EnOleadaIniciada();
+            ConfigurarCantidadDeEnemigos();
+            InstanciarEnemigo();
+        }
+    }
+
     public void TerminarOla() 
     {
         if (EnOleadaTerminada != null)
@@ -37,7 +68,9 @@ public class SpawnerEnemigos : MonoBehaviour
     public void InstanciarEnemigo() 
     {
         int indiceAleatorio = Random.Range(0, prefabsEnemigos.Count);
-        Instantiate(prefabsEnemigos[indiceAleatorio], transform.position, transform.rotation);
+        var enemioTemporal = Instantiate(prefabsEnemigos[indiceAleatorio], transform.position, transform.rotation);
+        EnemigosGenerados.Add(enemioTemporal);
+        
         enemigosDuranteEstaOleada--;
         if (enemigosDuranteEstaOleada < 0) 
         {

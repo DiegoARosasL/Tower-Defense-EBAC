@@ -1431,7 +1431,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &4681274776966288161
 Transform:
   m_ObjectHideFlags: 0
@@ -1483,9 +1483,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f59c83bd6f75d1469b8cbad05fc39bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Boss
-  objetivo: {fileID: 0}
-  vida: 100
-  Anim: {fileID: 0}
+  vidaMaxima: 100
+  recursosGanados: 10
 --- !u!195 &6143156943463100875
 NavMeshAgent:
   m_ObjectHideFlags: 0

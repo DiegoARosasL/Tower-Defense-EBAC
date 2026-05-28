@@ -177,7 +177,7 @@ GameObject:
   - component: {fileID: 1403296433242358698}
   m_Layer: 0
   m_Name: Enemigo2
-  m_TagString: Untagged
+  m_TagString: Enemigo
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -235,8 +235,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7d74d9964067284985100b817ec32c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemigo
-  objetivo: {fileID: 0}
   vidaMaxima: 100
+  recursosGanados: 10
 --- !u!195 &7281012549729362917
 NavMeshAgent:
   m_ObjectHideFlags: 0
