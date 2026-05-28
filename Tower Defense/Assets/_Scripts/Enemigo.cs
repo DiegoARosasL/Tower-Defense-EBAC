@@ -1,117 +1,78 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-public class Enemigo : MonoBehaviour
+public class Enemigo : EnemigoBase
 {
-    [Header("Referencias")]
-    public GameObject objetivo;
-    private Animator anim;
-    private NavMeshAgent agent;
+    private bool yaCorrio = false;
+    private bool yaGateo = false;
 
-    [Header("Atributos de Vida")]
-    public int vidaMaxima = 100;
-    private int vidaActual;
-
-    private bool objetivoAlcanzado = false;
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void Awake()
     {
-        objetivo = GameObject.Find("Objetivo");
-        agent = GetComponent<NavMeshAgent>();
-        anim = GetComponent<Animator>();
-
-        vidaActual = vidaMaxima;
-
-        // Inicia el movimiento hacia la base/jugador
-        if (objetivo != null)
-        {
-            agent.SetDestination(objetivo.transform.position);
-            anim.SetBool("IsMoving", true);
-        }
+        vidaMaxima = 100;
     }
 
-    // Update is called once per frame
-    void Update()
+    protected override void Update()
     {
-        if (UnityEngine.InputSystem.Keyboard.current.dKey.wasPressedThisFrame && vidaActual > 0 && !objetivoAlcanzado)
-        {
-            RecibirDano(25);
-        }
-    }
+        // 1. Ejecuta el Update de EnemigoBase (detecta la tecla D y revisa la muerte)
+        base.Update();
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Objetivo"))
-        {
-            objetivoAlcanzado = true;
-            agent.isStopped = true; // Detiene el NavMeshAgent
-
-            anim.SetBool("IsMoving", false);
-            anim.SetTrigger("OnObjectiveReached"); // Activará "Laughing"
-        }
-    }
-
-    public void RecibirDano(int dano)
-    {
-        vidaActual -= dano;
-        Debug.Log("Vida del zombie: " + vidaActual);
-
-        if (vidaActual <= 0)
-        {
-            Morir();
-        }
-        else
+        // 2. Ejecuta la lógica propia del enemigo común (animaciones de salud)
+        if (vidaActual > 0 && !objetivoAlcanzado)
         {
             ActualizarEstadoAnimacion();
         }
     }
 
-    void ActualizarEstadoAnimacion()
+    protected override void ActualizarEstadoAnimacion()
     {
-        // Calcula el porcentaje de vida restante
         float porcentajeVida = (float)vidaActual / vidaMaxima;
 
-        // Si pierde el primer golpe (ej. queda en 75% o menos) -> Corre
-        if (porcentajeVida <= 0.75f && porcentajeVida > 0.30f)
+        if (porcentajeVida <= 0.75f && porcentajeVida > 0.30f && !yaCorrio)
         {
-            anim.SetTrigger("OnRun");
-            agent.speed = 5.5f; // Aumenta velocidad en NavMeshAgent
+            Anim.SetTrigger("OnRun");
+            agent.speed = 5.5f;
+            yaCorrio = true;
         }
-        // Si le queda muy poca vida (30% o menos) -> Gatea
-        else if (porcentajeVida <= 0.30f)
+
+        else if (porcentajeVida <= 0.30f && !yaGateo)
         {
-            anim.SetTrigger("OnCrawl");
-            agent.speed = 1.5f; // Se vuelve muy lento al gatear
+            Anim.SetTrigger("OnCrawl");
+            agent.speed = 1.5f;
+            yaGateo = true;
         }
     }
 
-    void Morir()
+    public override void Danar(int dano = 0)
     {
-        agent.isStopped = true;
-        GetComponent<Collider>().enabled = false; // Evita colisiones muertas
-        anim.SetTrigger("OnDeath"); // Activará "Prone Death"
-    }
-
-    public void Danar()
-    {
-        // Si el objetivo ya no existe en la escena, no hacemos nada
+        
         if (objetivo == null) return;
 
         Objetivo scriptObjetivo = objetivo.GetComponent<Objetivo>();
         if (scriptObjetivo == null) return;
 
-        // 1. Calculamos si el próximo golpe de 20 puntos va a destruir el cubo
+        
         bool golpeDefinitivo = (scriptObjetivo.vida - 20) <= 0;
 
-        // 2. Ejecutamos tu función del cubo (esta le baja vida y lo destruye si llega a 0)
+       
         scriptObjetivo.RecibirDano(20);
 
-        // 3. Si fue el golpe definitivo, activamos la risa del zombie
+       
         if (golpeDefinitivo)
         {
             Debug.Log("¡Base destruida tras varios golpes continuos!");
-            anim.SetTrigger("OnObjectiveDestroyed");
+            Anim.SetTrigger("OnObjectiveDestroyed");
+        }
+    }
+
+    public override void OnDestroy()
+    {
+        // Ejecuta lo que pusimos en la base (dar recursos y quitarse del spawner)
+        base.OnDestroy();
+
+        // Lógica exclusiva del enemigo común: sumar al contador correcto
+        if (referenciaAdminJuego != null)
+        {
+            referenciaAdminJuego.enemigosBaseDerrotados++;
         }
     }
 }
